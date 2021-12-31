@@ -3,10 +3,11 @@ import App from "./App.vue";
 import router from "./router";
 
 import VueApollo from "vue-apollo";
-
 import ApolloClient from "apollo-client";
 import { HttpLink } from "apollo-link-http";
+import { WebSocketLink } from "apollo-link-ws";
 import { InMemoryCache } from "apollo-cache-inmemory";
+
 import vuetify from "./plugins/vuetify";
 
 Vue.use(VueApollo);
@@ -14,7 +15,7 @@ Vue.use(VueApollo);
 Vue.config.productionTip = false;
 
 // Create an http link:
-const link = new HttpLink({
+const queryLink = new HttpLink({
   uri: "http://35.189.161.175:8080/v1/graphql",
   fetch,
   headers: {
@@ -22,12 +23,31 @@ const link = new HttpLink({
     "x-hasura-admin-secret": "myadminsecretkey",
   },
 });
-const client = new ApolloClient({
-  link: link,
+
+// Create a webSocket link:
+const subscriptionLink = new WebSocketLink({
+  uri: "ws://35.189.161.175:8080/v1/graphql",
+  options: {
+    reconnect: true,
+    timeout: 30000,
+    connectionParams: () => {
+      return {
+        headers: {
+          "content-type": "application/json",
+          "x-hasura-admin-secret": "myadminsecretkey",
+        },
+      };
+    },
+  },
+});
+
+export const client = new ApolloClient({
+  link: process.env.VUE_APP_TITLE == "Query" ? queryLink : subscriptionLink,
   cache: new InMemoryCache({
     addTypename: true,
   }),
 });
+
 const apolloProvider = new VueApollo({
   defaultClient: client,
 });

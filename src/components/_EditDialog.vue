@@ -39,7 +39,7 @@
 </template>
 
 <script>
-import { GET_TODO_LIST } from "./ToDoList.vue";
+import { GET_TODO_LIST } from "./QueryTable.vue";
 import gql from "graphql-tag";
 
 const INSERT_TODO_LIST = gql`
@@ -112,16 +112,23 @@ export default {
             assignee: this.form.assignee,
           },
           update: (store, { data: { insert_todo_list_one } }) => {
-            try {
-              let data = store.readQuery({
-                query: GET_TODO_LIST,
-              });
-              data.todo_list.splice(0, 0, insert_todo_list_one);
-              store.writeQuery({ query: GET_TODO_LIST, data });
+            // Use Query
+            if (process.env.VUE_APP_TITLE == "Query") {
+              try {
+                let data = store.readQuery({
+                  query: GET_TODO_LIST,
+                });
+                data.todo_list.splice(0, 0, insert_todo_list_one);
+                store.writeQuery({ query: GET_TODO_LIST, data });
+                this.dialog = false;
+                this.$emit("result", "Inserted Successfully!");
+              } catch (err) {
+                this.$emit("result", "Cannot Insert Task");
+              }
+            } else {
+              // Use Subscription
               this.dialog = false;
               this.$emit("result", "Inserted Successfully!");
-            } catch (err) {
-              this.$emit("result", "Cannot Insert Task");
             }
           },
         });
@@ -134,15 +141,22 @@ export default {
             assignee: this.form.assignee,
           },
           update: (store, { data: { update_todo_list_by_pk } }) => {
-            try {
-              let data = store.readQuery({
-                query: GET_TODO_LIST,
-              });
-              store.writeQuery({ query: GET_TODO_LIST, data });
+            // Use Query
+            if (process.env.VUE_APP_TITLE == "Query") {
+              try {
+                let data = store.readQuery({
+                  query: GET_TODO_LIST,
+                });
+                store.writeQuery({ query: GET_TODO_LIST, data });
+                this.dialog = false;
+                this.$emit("result", "Updated Successfully!");
+              } catch (err) {
+                this.$emit("result", "Cannot Update Task");
+              }
+            } else {
+              // Use Subscription
               this.dialog = false;
               this.$emit("result", "Updated Successfully!");
-            } catch (err) {
-              this.$emit("result", "Cannot Update Task");
             }
           },
         });

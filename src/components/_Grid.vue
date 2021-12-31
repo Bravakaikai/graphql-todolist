@@ -37,36 +37,25 @@
 import DeleteDialog from "./_DeleteDialog.vue";
 import EditDialog from "./_EditDialog.vue";
 import Snackbar from "./_Snackbar.vue";
-import gql from "graphql-tag";
-
-export const GET_TODO_LIST = gql`
-  query MyQuery {
-    todo_list(order_by: { updated_at: desc }) {
-      assignee
-      created_at
-      id
-      task
-      updated_at
-    }
-  }
-`;
 
 export default {
-  name: "ToDoList",
+  name: "Grid",
   components: {
     DeleteDialog,
     EditDialog,
     Snackbar,
   },
-  apollo: {
+  props: {
     todo_list: {
-      query: GET_TODO_LIST,
+      type: Array,
+      default: () => {
+        return [];
+      },
     },
   },
   data() {
     return {
       search: "",
-      todo_list: [],
       headers: [
         { text: "Actions", value: "actions", sortable: false },
         { text: "ID", value: "id" },

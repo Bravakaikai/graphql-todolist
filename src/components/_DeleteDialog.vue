@@ -22,7 +22,7 @@
 </template>
 
 <script>
-import { GET_TODO_LIST } from "./ToDoList.vue";
+import { GET_TODO_LIST } from "./QueryTable.vue";
 import gql from "graphql-tag";
 
 const REMOVE_TODO_LIST = gql`
@@ -56,17 +56,23 @@ export default {
         },
         update: (store, { data: { delete_todo_list_by_pk } }) => {
           this.dialog = false;
-          try {
-            let data = store.readQuery({
-              query: GET_TODO_LIST,
-            });
-            data.todo_list = data.todo_list.filter(
-              (item) => item.id != this.id
-            );
-            store.writeQuery({ query: GET_TODO_LIST, data });
+          // Use Query
+          if (process.env.VUE_APP_TITLE == "Query") {
+            try {
+              let data = store.readQuery({
+                query: GET_TODO_LIST,
+              });
+              data.todo_list = data.todo_list.filter(
+                (item) => item.id != this.id
+              );
+              store.writeQuery({ query: GET_TODO_LIST, data });
+              this.$emit("result", "Deleted Successfully!");
+            } catch (err) {
+              this.$emit("result", "Cannot Delete Task");
+            }
+          } else {
+            // Use Subscription
             this.$emit("result", "Deleted Successfully!");
-          } catch (err) {
-            this.$emit("result", "Cannot Delete Task");
           }
         },
       });
