@@ -1,4 +1,4 @@
-# graphql_todolist
+# GraphQL To Do List
 Vue.js with GraphQL
 
 ## Project setup
